@@ -1,9 +1,25 @@
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from database import messages_collection
 from models import Message, Conversation
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 app = FastAPI()
+
+
+# Configuracion de CORS para hablar con el frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[FRONTEND_URL],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Convertir ObjectId a string xd
 def mostrar_message(conv):
