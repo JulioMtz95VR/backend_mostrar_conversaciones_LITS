@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from database import messages_collection
@@ -45,21 +45,24 @@ async def get_conversation(session_id: str):
         raise HTTPException(status_code=500, detail=str(e))
     
 @app.get("/sessions", response_model=list[Conversation])
-async def get_session():
-    try:
-        print("sessiones")
-        docs = messages_collection.find({}, {"sessionId": 1, "_id": 0})
-        sessions = [Conversation(sessionId=doc["sessionId"]) for doc in docs]
+async def get_sessions(
+     page: int = Query(1, ge=1),
+     limit: int = Query(20, le=100)
+):
+        try:
+             print(f"Cargando Sessions... Pagina: {page}, Límite: {limit}")
+             skip = (page - 1) * limit
 
-        if not sessions:
-            raise HTTPException(status_code=404, detail="SessionId de Conversacion no encontrado")
+             # Consulta optimizada a MongoDB
+             cursor = messages_collection.find({}, {"sessionId": 1, "_id": 0}).skip(skip).limit(limit)
+
+             docs = list(cursor)
+
+             # Convertimos a lista de objetos
+             sessions = [Conversation(sessionId=doc["sessionId"]) for doc in docs]
+
+             return sessions
         
-        return sessions
-    except Exception as a:
-        raise HTTPException(status_code=500, detail=str(a))
+        except Exception as a:
+           raise HTTPException(status_code=500, detail=str(a))
     
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run("main:app", host="0.0.0.0", port=8001)
