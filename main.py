@@ -11,7 +11,6 @@ FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 app = FastAPI()
 
-
 # Configuracion de CORS para hablar con el frontend
 app.add_middleware(
     CORSMiddleware,
