@@ -52,12 +52,9 @@ async def get_sessions(
         try:
              print(f"Cargando Sessions... Pagina: {page}, Límite: {limit}")
              skip = (page - 1) * limit
-
              # Consulta optimizada a MongoDB
              cursor = messages_collection.find({}, {"sessionId": 1, "_id": 0}).skip(skip).limit(limit)
-
              docs = list(cursor)
-
              # Convertimos a lista de objetos
              sessions = [Conversation(sessionId=doc["sessionId"]) for doc in docs]
 
